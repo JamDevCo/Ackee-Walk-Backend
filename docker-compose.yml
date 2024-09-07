@@ -1,0 +1,54 @@
+version: '3.8'
+
+services:
+  # Backend Service
+  laravel_backend:
+    image: bigmeel/ackeewalk:test-build
+    container_name: aw_backend
+    restart: unless-stopped
+    volumes:
+      - .:/var/www
+    networks:
+      - ackee_net
+    depends_on:
+      - db
+      - nginx_server
+  
+  # Web Server
+  nginx_server:
+    image: nginx:alpine
+    container_name: nginx_server
+    restart: always
+    ports: 
+      - "8080:80"
+    volumes:
+      - .:/var/www
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - ackee_net
+
+  # MySQL Service
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: P@$$w0rd
+      MYSQL_DATABASE: aw_db
+      MYSQL_USER: admin
+      MYSQL_PASSWORD: Ack33!P@$$
+    ports:
+      - "3306:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    networks:
+      - ackee_net
+
+networks:
+  ackee_net:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local  
+
