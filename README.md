@@ -64,3 +64,22 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+## Using Docker to view the application
+
+This project is set up to use Docker Compose to run all components of the application without the need to set up your environment.
+To use the containers please install docker to your system. For Developers running MAC and Windows PC it is recommended that 
+Docker Desktop be installed to ensure all dependencies are set up.
+
+Once installed, clone this repo to your system on the command line with `git clone git@github.com:JamDevCo/Ackee-Walk-Backend.git`.
+Navigate to the directory and run the following command:
+
+`sudo docker compose up -d`
+
+The following components will be created:
+ - The Backend Laravel container for the Ackee Walk server
+ - A container hosting the MySQL database server
+ - A container hosting an nginx server to serve the laravel backend application
+
+To view the application from the browser go to `http://localhost:8080` 
+
