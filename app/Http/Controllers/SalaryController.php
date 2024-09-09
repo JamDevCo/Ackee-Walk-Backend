@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Salary;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Location;
+use App\Models\Company;
+use App\Models\Industry;
+use App\Models\ExperienceLevel;
 
 class SalaryController extends Controller
 {
@@ -15,7 +19,6 @@ class SalaryController extends Controller
             'company_id' => 'required|exists:companies,id',
             'industry_id' => 'required|exists:industries,id',
             'experience_id' => 'required|exists:experience_levels,id',
-            'salary_breakdown_id' => 'required|exists:salary_breakdowns,id',
             'title' => 'required|string',
             'total_yearly_compensation' => 'required|numeric',
             'base_salary' => 'required|numeric',
@@ -28,7 +31,6 @@ class SalaryController extends Controller
             'race' => 'nullable|string',
             'is_verified' => 'boolean',
             'additional_comments' => 'nullable|string',
-            'comment_id' => 'nullable|exists:comments,id',
             'posted_at' => 'nullable|date',
         ]);
 
@@ -51,5 +53,17 @@ class SalaryController extends Controller
     {
         $salary = Salary::with(['location', 'experienceLevel', 'industry'])->findOrFail($id);
         return response()->json($salary);
+    }
+
+    public function getFormData()
+    {
+        $data = [
+            'locations' => Location::select('id', 'country', 'region', 'city')->get(),
+            'companies' => Company::select('id', 'name')->get(),
+            'industries' => Industry::select('id', 'name')->get(),
+            'experienceLevels' => ExperienceLevel::select('id', 'name')->get(),
+        ];
+
+        return response()->json($data);
     }
 }

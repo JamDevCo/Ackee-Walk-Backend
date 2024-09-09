@@ -42,11 +42,6 @@ class Salary extends Model
         'is_verified' => 'boolean',
     ];
 
-    public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-
     public function location()
     {
         return $this->belongsTo(Location::class);
