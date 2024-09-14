@@ -10,6 +10,9 @@ use App\Models\Company;
 use App\Models\Industry;
 use App\Models\ExperienceLevel;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SalaryVerificationMail;
+use Illuminate\Support\Str;
 
 class SalaryController extends Controller
 {
@@ -39,20 +42,34 @@ class SalaryController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $salary = Salary::create($request->all());
+        $verificationToken = Str::random(32);
+        $data = $request->all();
+        $data['verification_token'] = $verificationToken;
+        $data['is_verified'] = false;
 
-        return response()->json($salary, 201);
+        $salary = Salary::create($data);
+
+        Mail::to($request->email)->send(new SalaryVerificationMail($verificationToken));
+
+        return response()->json([
+            'message' => 'Salary submitted successfully. Please check your email to verify.',
+            'salary' => $salary
+        ], 201);
     }
 
     public function index()
     {
-        $salaries = Salary::with(['company', 'location', 'experienceLevel', 'industry'])->get();
+        $salaries = Salary::with(['company', 'location', 'experienceLevel', 'industry'])
+            ->where('is_verified', true)
+            ->get();
         return response()->json($salaries);
     }
 
     public function show($id)
     {
-        $salary = Salary::with(['company', 'location', 'experienceLevel', 'industry'])->findOrFail($id);
+        $salary = Salary::with(['company', 'location', 'experienceLevel', 'industry'])
+            ->where('is_verified', true) 
+            ->findOrFail($id);
         return response()->json($salary);
     }
 
@@ -70,7 +87,8 @@ class SalaryController extends Controller
 
     public function update(Request $request, $id)
     {
-        $salary = Salary::findOrFail($id);
+        $salary = Salary::where('is_verified', true) 
+            ->findOrFail($id);
 
         $validator = Validator::make($request->all(), [
             'location_id' => 'exists:locations,id',
@@ -87,7 +105,6 @@ class SalaryController extends Controller
             'education_level' => 'string',
             'gender' => 'nullable|string',
             'race' => 'nullable|string',
-            'is_verified' => 'boolean',
             'additional_comments' => 'nullable|string',
             'posted_at' => 'nullable|date',
         ]);
@@ -103,7 +120,8 @@ class SalaryController extends Controller
 
     public function destroy($id)
     {
-        $salary = Salary::findOrFail($id);
+        $salary = Salary::where('is_verified', true) // Only use verified forms
+            ->findOrFail($id);
         $salary->delete();
 
         return response()->json(null, 204);
