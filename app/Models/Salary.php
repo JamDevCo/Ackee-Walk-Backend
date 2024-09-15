@@ -28,6 +28,7 @@ class Salary extends Model
         'gender',
         'race',
         'is_verified',
+        'verification_token',
         'additional_comments',
         'comment_id',
         'posted_at',

@@ -13,12 +13,11 @@ return new class extends Migration
     {
         Schema::create('salaries', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('role_id')->constrained();
             $table->foreignUuid('location_id')->constrained();
             $table->foreignUuid('company_id')->constrained();
             $table->foreignUuid('industry_id')->constrained();
             $table->foreignUuid('experience_id')->constrained('experience_levels');
-            $table->foreignUuid('salary_breakdown_id')->constrained();
+            $table->foreignUuid('salary_breakdown_id')->nullable()->constrained();
             $table->string('title');
             $table->decimal('total_yearly_compensation', 15, 2);
             $table->decimal('base_salary', 15, 2);
@@ -30,6 +29,7 @@ return new class extends Migration
             $table->string('gender')->nullable();
             $table->string('race')->nullable();
             $table->boolean('is_verified')->default(false);
+            $table->string('verification_token')->nullable();
             $table->text('additional_comments')->nullable();
             $table->uuid('comment_id')->nullable();
             $table->timestamp('posted_at')->useCurrent();
