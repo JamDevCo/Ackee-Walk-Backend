@@ -16,8 +16,9 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     libonig-dev \
     libzip-dev \
+    libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo mbstring exif pcntl bcmath gd intl zip
+    && docker-php-ext-install pdo pdo_pgsql mbstring exif pcntl bcmath gd intl zip
 
  
 # Install Composer
@@ -27,10 +28,10 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 COPY . /var/www
 
 # Set permissions for www-data user
-RUN chown -R www-data:www-data /var/www
+# RUN chown -R www-data:www-data /var/www
 
 # Switch to www-data user
-USER www-data
+# USER www-data
 
 # Install composer dependencies
 RUN composer install
