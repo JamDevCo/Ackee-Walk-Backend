@@ -18,10 +18,10 @@ class SalaryVerificationController extends Controller
             ]);
 
             $clientUrl = Config::get('app.client_url', 'http://localhost:3000');
-            return redirect($clientUrl . '/verification-success');
+            return redirect($clientUrl . '/verification');
         }
 
         $clientUrl = Config::get('app.client_url', 'http://localhost:3000');
-        return redirect($clientUrl . '/verification-error');
+        return redirect($clientUrl . '/verification/error');
     }
 }

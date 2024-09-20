@@ -14,6 +14,14 @@ return new class extends Migration
         Schema::create('companies', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name')->unique();
+            $table->string('logo')->nullable();
+            $table->string('website')->nullable();
+            $table->text('description')->nullable();
+            $table->integer('founded_year')->nullable();
+            $table->string('headquarters')->nullable();
+            $table->integer('employee_count')->nullable();
+            $table->string('salary_range')->nullable();
+            $table->foreignUuid('industry_id')->nullable()->constrained();
             $table->timestamps();
         });
     }

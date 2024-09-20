@@ -13,27 +13,29 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SalaryVerificationMail;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 
 class SalaryController extends Controller
 {
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'location_id' => 'required|exists:locations,id',
-            'company_id' => 'required|exists:companies,id',
-            'industry_id' => 'required|exists:industries,id',
-            'experience_id' => 'required|exists:experience_levels,id',
+            'location_id' => 'required|exists:locations,id', 
+            'company_id' => 'required|exists:companies,id', 
+            'industry_id' => 'required|exists:industries,id', 
             'title' => 'required|string',
-            'total_yearly_compensation' => 'required|numeric',
             'base_salary' => 'required|numeric',
+            'email' => 'required|email', 
+            'experience_id' => 'nullable|exists:experience_levels,id',
+            'total_yearly_compensation' => 'nullable|numeric',
             'stock_grant_value' => 'nullable|numeric',
             'bonus' => 'nullable|numeric',
-            'years_of_experience' => 'required|integer',
-            'years_at_company' => 'required|integer',
-            'education_level' => 'required|string',
+            'years_of_experience' => 'nullable|integer',
+            'years_at_company' => 'nullable|integer',
+            'education_level' => 'nullable|string',
             'gender' => 'nullable|string',
             'race' => 'nullable|string',
-            'is_verified' => 'boolean',
+            'is_verified' => 'nullable|boolean',
             'additional_comments' => 'nullable|string',
             'posted_at' => 'nullable|date',
         ]);
@@ -61,7 +63,7 @@ class SalaryController extends Controller
     {
         $salaries = Salary::with(['company', 'location', 'experienceLevel', 'industry'])
             ->where('is_verified', true)
-            ->get();
+            ->paginate(10);
         return response()->json($salaries);
     }
 
@@ -125,5 +127,49 @@ class SalaryController extends Controller
         $salary->delete();
 
         return response()->json(null, 204);
+    }
+
+    public function search(Request $request)
+    {
+        $query = Salary::query()->with(['company', 'location', 'experienceLevel', 'industry'])
+            ->where('is_verified', true);
+
+        // Search
+        if ($request->has('search')) {
+            $searchTerm = $request->search;
+            $query->where(function (Builder $query) use ($searchTerm) {
+                $query->whereHas('company', function (Builder $query) use ($searchTerm) {
+                    $query->where('name', 'like', "%{$searchTerm}%");
+                })
+                ->orWhere('title', 'like', "%{$searchTerm}%")
+                ->orWhereHas('industry', function (Builder $query) use ($searchTerm) {
+                    $query->where('name', 'like', "%{$searchTerm}%");
+                });
+            });
+        }
+
+        // Filters
+        if ($request->has('industry')) {
+            $query->where('industry_id', $request->industry);
+        }
+
+        if ($request->has('location')) {
+            $query->where('location_id', $request->location);
+        }
+
+        if ($request->has('experience_level')) {
+            $query->where('experience_id', $request->experience_level);
+        }
+
+        // Sorting
+        $sortField = $request->input('sort_by', 'created_at');
+        $sortDirection = $request->input('sort_direction', 'desc');
+        $query->orderBy($sortField, $sortDirection);
+
+        // Pagination
+        $perPage = $request->input('per_page', 15);
+        $salaries = $query->paginate($perPage);
+
+        return response()->json($salaries);
     }
 }
