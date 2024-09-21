@@ -122,7 +122,7 @@ class SalaryController extends Controller
 
     public function destroy($id)
     {
-        $salary = Salary::where('is_verified', true) // Only use verified forms
+        $salary = Salary::where('is_verified', true) 
             ->findOrFail($id);
         $salary->delete();
 
@@ -147,8 +147,7 @@ class SalaryController extends Controller
                 });
             });
         }
-
-        // Filters
+ 
         if ($request->has('industry')) {
             $query->where('industry_id', $request->industry);
         }
@@ -161,12 +160,10 @@ class SalaryController extends Controller
             $query->where('experience_id', $request->experience_level);
         }
 
-        // Sorting
         $sortField = $request->input('sort_by', 'created_at');
         $sortDirection = $request->input('sort_direction', 'desc');
         $query->orderBy($sortField, $sortDirection);
 
-        // Pagination
         $perPage = $request->input('per_page', 15);
         $salaries = $query->paginate($perPage);
 
