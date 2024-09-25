@@ -133,7 +133,7 @@ class SalaryController extends Controller
     {
         $query = Salary::query()->with(['company', 'location', 'experienceLevel', 'industry'])
             ->where('is_verified', true);
-
+        // test
         // Search
         if ($request->has('search')) {
             $searchTerm = $request->search;
